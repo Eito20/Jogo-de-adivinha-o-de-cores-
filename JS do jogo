@@ -1,0 +1,115 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+
+// Lista de 148 cores diferentes
+const cores = [
+  'vermelho', 'azul', 'verde', 'amarelo', 'roxo', 'laranja', 'rosa', 'marrom', 'cinza', 'preto',
+  'branco', 'bege', 'turquesa', 'lavanda', 'ciano', 'magenta', 'violeta', 'índigo', 'carmesim', 'esmeralda',
+  'safira', 'rubi', 'ametista', 'jade', 'pérola', 'coral', 'salmão', 'dourado', 'prateado', 'bronze',
+  'cobre', 'oliva', 'creme', 'marfim', 'ébano', 'escarlate', 'borgonha', 'vinho', 'cereja', 'framboesa',
+  'morango', 'pêssego', 'damasco', 'tangerina', 'limão', 'lima', 'menta', 'pistache', 'água-marinha', 'celeste',
+  'cerúleo', 'cobalto', 'marinho', 'petróleo', 'ardósia', 'chumbo', 'grafite', 'prata', 'aço', 'titânio',
+  'cáqui', 'areia', 'ocre', 'sépia', 'siena', 'terracota', 'caramelo', 'chocolate', 'café', 'canela',
+  'amêndoa', 'avelã', 'castanha', 'mogno', 'tabaco', 'ferrugem', 'tijolo', 'carmim', 'grená', 'púrpura',
+  'berinjela', 'ameixa', 'lilás', 'glicínia', 'orquídea', 'fúcsia', 'malva', 'açafrão', 'mostarda', 'âmbar',
+  'mel', 'trigo', 'palha', 'milho', 'abóbora', 'cenoura', 'pêssego', 'salmão', 'coral', 'flamingo',
+  'melancia', 'amora', 'mirtilo', 'uva', 'ameixa', 'figo', 'romã', 'cereja', 'maçã', 'pera',
+  'limão', 'lima', 'abacate', 'kiwi', 'oliva', 'musgo', 'jade', 'esmeralda', 'turmalina', 'água-marinha',
+  'topázio', 'âmbar', 'opala', 'ônix', 'hematita', 'obsidiana', 'ágata', 'lápis-lazúli', 'turquesa', 'malaquita',
+  'jaspe', 'granada', 'coral', 'pérola', 'marfim', 'nácar', 'madrepérola', 'alabastro', 'ametista', 'quartzo'
+]
+
+export default function JogoAdivinhacaoCores() {
+  const [corCorreta, setCorCorreta] = useState('')
+  const [tentativa, setTentativa] = useState('')
+  const [tentativasRestantes, setTentativasRestantes] = useState(3)
+  const [dica, setDica] = useState('')
+  const [gameOver, setGameOver] = useState(false)
+  const [ganhou, setGanhou] = useState(false)
+
+  useEffect(() => {
+    // Seleciona uma cor aleatória ao iniciar o jogo
+    setCorCorreta(cores[Math.floor(Math.random() * cores.length)])
+  }, [])
+
+  const verificarTentativa = () => {
+    if (tentativa.toLowerCase() === corCorreta) {
+      setGanhou(true)
+      setGameOver(true)
+    } else {
+      setTentativasRestantes(tentativasRestantes - 1)
+      if (tentativasRestantes === 1) {
+        setGameOver(true)
+      } else {
+        // Gera uma dica
+        const dicas = [
+          `A cor correta começa com a letra "${corCorreta[0]}"`,
+          `A cor correta tem ${corCorreta.length} letras`,
+          `A cor correta rima com "${gerarRima(corCorreta)}"`
+        ]
+        setDica(dicas[Math.floor(Math.random() * dicas.length)])
+      }
+    }
+    setTentativa('')
+  }
+
+  const gerarRima = (palavra) => {
+    const rimas = {
+      'a': 'fada',
+      'e': 'sede',
+      'i': 'aqui',
+      'o': 'bolo',
+      'u': 'caju'
+    }
+    return rimas[palavra[palavra.length - 1]] || 'cor'
+  }
+
+  const reiniciarJogo = () => {
+    setCorCorreta(cores[Math.floor(Math.random() * cores.length)])
+    setTentativasRestantes(3)
+    setDica('')
+    setGameOver(false)
+    setGanhou(false)
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+      <h1 className="text-3xl font-bold mb-6">Jogo de Adivinhação de Cores</h1>
+      {!gameOver ? (
+        <>
+          <p className="mb-4">Adivinhe a cor! Você tem {tentativasRestantes} tentativas restantes.</p>
+          <Input
+            type="text"
+            value={tentativa}
+            onChange={(e) => setTentativa(e.target.value)}
+            placeholder="Digite uma cor"
+            className="mb-4 w-64"
+          />
+          <Button onClick={verificarTentativa} className="mb-4">Enviar Tentativa</Button>
+          {dica && (
+            <Alert className="mb-4 w-64">
+              <AlertTitle>Dica:</AlertTitle>
+              <AlertDescription>{dica}</AlertDescription>
+            </Alert>
+          )}
+        </>
+      ) : (
+        <Alert className={`mb-4 w-64 ${ganhou ? 'bg-green-100' : 'bg-red-100'}`}>
+          <AlertTitle>{ganhou ? 'Parabéns!' : 'Fim de Jogo'}</AlertTitle>
+          <AlertDescription>
+            {ganhou
+              ? 'Você acertou a cor!'
+              : `A cor correta era ${corCorreta}.`}
+          </AlertDescription>
+        </Alert>
+      )}
+      {gameOver && (
+        <Button onClick={reiniciarJogo} className="mt-4">Jogar Novamente</Button>
+      )}
+    </div>
+  )
+}
